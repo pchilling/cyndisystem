@@ -44,7 +44,9 @@ app.get('/', (req, res) => {
     status: 'ok',
     message: 'LINE 童裝代購自動化系統正在運行中 (Vercel)',
     timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV
+    env: process.env.NODE_ENV,
+    hasSecret: !!process.env.LINE_CHANNEL_SECRET,
+    secretLength: process.env.LINE_CHANNEL_SECRET ? process.env.LINE_CHANNEL_SECRET.length : 0
   });
 });
 
