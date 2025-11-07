@@ -53,10 +53,19 @@ app.get('/', (req, res) => {
 // 驗證 LINE 簽章
 function validateSignature(signature, body) {
   const channelSecret = process.env.LINE_CHANNEL_SECRET;
+  console.log('Validating signature...');
+  console.log('Body length:', body ? body.length : 0);
+  console.log('Channel secret length:', channelSecret ? channelSecret.length : 0);
+
   const hash = crypto
     .createHmac('SHA256', channelSecret)
     .update(body)
     .digest('base64');
+
+  console.log('Computed hash:', hash);
+  console.log('Received signature:', signature);
+  console.log('Match:', hash === signature);
+
   return hash === signature;
 }
 
