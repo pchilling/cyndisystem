@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyndi韓國童裝代購 - 管理後台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css" rel="stylesheet">
+    <link href="admin.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 0.5rem;
+            margin: 0.2rem 0;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .main-content {
+            padding: 2rem;
+        }
+        .stat-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .table-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .btn-admin {
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+        .page-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 側邊欄 -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-store me-2"></i>
+                        管理後台
+                    </h4>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                儀表板
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#orders" onclick="showSection('orders')">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                訂單管理
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#customers" onclick="showSection('customers')">
+                                <i class="fas fa-users me-2"></i>
+                                客戶管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#products" onclick="showSection('products')">
+                                <i class="fas fa-box me-2"></i>
+                                商品管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                                <i class="fas fa-chart-line me-2"></i>
+                                銷售報表
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#notifications" onclick="showSection('notifications')">
+                                <i class="fas fa-bell me-2"></i>
+                                通知管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings" onclick="showSection('settings')">
+                                <i class="fas fa-cog me-2"></i>
+                                系統設定
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主要內容區 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- 儀表板 -->
+                <div id="dashboard" class="content-section">
+                    <h1 class="page-title">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        管理儀表板
+                    </h1>
+
+                    <!-- 統計卡片 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                                    <h3 class="card-title text-primary" id="totalOrders">-</h3>
+                                    <p class="card-text text-muted">總訂單數</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                    <h3 class="card-title text-warning" id="pendingOrders">-</h3>
+                                    <p class="card-text text-muted">待處理訂單</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                                    <h3 class="card-title text-success" id="totalRevenue">-</h3>
+                                    <p class="card-text text-muted">總營收</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x text-info mb-2"></i>
+                                    <h3 class="card-title text-info" id="totalCustomers">-</h3>
+                                    <p class="card-text text-muted">總客戶數</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 圖表和最近訂單 -->
+                    <div class="row">
+                        <div class="col-md-8 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line me-2"></i>銷售趨勢</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-list me-2"></i>最近訂單</h5>
+                                </div>
+                                <div class="card-body" id="recentOrders">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        載入中...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 訂單管理 -->
+                <div id="orders" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="page-title">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            訂單管理
+                        </h1>
+                        <button class="btn btn-primary" onclick="loadOrders()">
+                            <i class="fas fa-sync-alt me-2"></i>重新整理
+                        </button>
+                    </div>
+
+                    <!-- 快速篩選標籤 -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-outline-primary me-2" onclick="filterOrdersByStatus('')">
+                                    <i class="fas fa-list me-1"></i>全部訂單
+                                </button>
+                                <button class="btn btn-outline-warning me-2" onclick="filterOrdersByMergeStatus('待併單')">
+                                    <i class="fas fa-clock me-1"></i>待併單 <span id="pendingMergeCount" class="badge bg-warning ms-1">0</span>
+                                </button>
+                                <button class="btn btn-outline-info me-2" onclick="filterOrdersByStatus('已付款')">
+                                    <i class="fas fa-check-circle me-1"></i>已付款
+                                </button>
+                                <button class="btn btn-outline-success me-2" onclick="filterOrdersByStatus('已完成')">
+                                    <i class="fas fa-flag-checkered me-1"></i>已完成
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-success" onclick="showBatchMergeModal()" style="display:none;" id="batchMergeBtn">
+                                    <i class="fas fa-layer-group me-2"></i>批量併單處理
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 篩選器 -->
+                    <div class="card table-card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <select class="form-select" id="orderStatusFilter">
+                                        <option value="">所有狀態</option>
+                                        <option value="待付款">🟡 待付款</option>
+                                        <option value="已付款">🟢 已付款</option>
+                                        <option value="配貨中">🔵 配貨中</option>
+                                        <option value="已出貨">🟣 已出貨</option>
+                                        <option value="已完成">⚪ 已完成</option>
+                                        <option value="已取消">🔴 已取消</option>
+                                        <option value="退貨中">🟨 退貨中</option>
+                                        <option value="退款中">🟠 退款中</option>
+                                        <option value="糾紛中">⚫ 糾紛中</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="mergeStatusFilter">
+                                        <option value="">併單狀態</option>
+                                        <option value="待併單">待併單</option>
+                                        <option value="已併單">已併單</option>
+                                        <option value="部分出貨">部分出貨</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" id="orderSearch" placeholder="搜尋訂單編號或客戶姓名...">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary btn-admin w-100" onclick="loadOrders()">
+                                        <i class="fas fa-search me-2"></i>搜尋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 訂單列表 -->
+                    <div class="card table-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th width="15%">訂單編號</th>
+                                            <th width="15%">客戶</th>
+                                            <th width="10%">金額</th>
+                                            <th width="12%">訂單狀態</th>
+                                            <th width="12%">併單狀態</th>
+                                            <th width="15%">下單時間</th>
+                                            <th width="21%">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTable">
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                                載入中...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客戶管理 -->
+                <div id="customers" class="content-section" style="display: none;">
+                    <h1 class="page-title">
+                        <i class="fas fa-users me-2"></i>
+                        客戶管理
+                    </h1>
+
+                    <!-- 篩選器 -->
+                    <div class="card table-card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="customerLevelFilter">
+                                        <option value="">所有等級</option>
+                                        <option value="一般會員">一般會員</option>
+                                        <option value="VIP會員">VIP會員</option>
+                                        <option value="黑名單">黑名單</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="customerSearch" placeholder="搜尋客戶姓名、電話或 LINE ID...">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary btn-admin w-100" onclick="loadCustomers()">
+                                        <i class="fas fa-search me-2"></i>搜尋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 客戶統計卡片 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                    <h4 class="card-title text-primary" id="totalCustomersCount">-</h4>
+                                    <p class="card-text text-muted">總客戶數</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-crown fa-2x text-warning mb-2"></i>
+                                    <h4 class="card-title text-warning" id="vipCustomersCount">-</h4>
+                                    <p class="card-text text-muted">VIP 客戶</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
+                                    <h4 class="card-title text-success" id="activeCustomersCount">-</h4>
+                                    <p class="card-text text-muted">活躍客戶</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-plus fa-2x text-info mb-2"></i>
+                                    <h4 class="card-title text-info" id="newCustomersCount">-</h4>
+                                    <p class="card-text text-muted">本月新客戶</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 客戶列表 -->
+                    <div class="card table-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>客戶資訊</th>
+                                            <th>聯絡方式</th>
+                                            <th>等級</th>
+                                            <th>訂單統計</th>
+                                            <th>總消費</th>
+                                            <th>最後下單</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">載入中...</span>
+                                                </div>
+                                                <p class="mt-2 text-muted">載入客戶資料中...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- 分頁控制 -->
+                            <nav aria-label="客戶分頁" class="mt-3">
+                                <ul class="pagination justify-content-center" id="customersPagination">
+                                    <!-- 分頁按鈕將由 JavaScript 生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="products" class="content-section" style="display: none;">
+                    <h1 class="page-title">
+                        <i class="fas fa-layer-group me-2"></i>
+                        商品變體管理
+                    </h1>
+
+                    <!-- 搜尋和篩選器 -->
+                    <div class="card table-card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="productSearch" placeholder="搜尋商品名稱...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="styleFilter">
+                                        <option value="">所有款式</option>
+                                        <option value="包屁款">包屁款</option>
+                                        <option value="兒童款">兒童款</option>
+                                        <option value="漱口杯">漱口杯</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <select class="form-select" id="colorFilter">
+                                        <option value="">顏色</option>
+                                        <option value="白色">白色</option>
+                                        <option value="粉色">粉色</option>
+                                        <option value="藍色">藍色</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <select class="form-select" id="sizeFilter">
+                                        <option value="">尺寸</option>
+                                        <option value="S">S</option>
+                                        <option value="M">M</option>
+                                        <option value="L">L</option>
+                                        <option value="XL">XL</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <select class="form-select" id="genderFilter">
+                                        <option value="">性別</option>
+                                        <option value="女性">女性</option>
+                                        <option value="男性">男性</option>
+                                        <option value="通用">通用</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <select class="form-select" id="productStatusFilter">
+                                        <option value="">狀態</option>
+                                        <option value="可購買">可購買</option>
+                                        <option value="已斷貨">已斷貨</option>
+                                        <option value="已售完">已售完</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary btn-admin w-100" onclick="loadProducts()">
+                                        <i class="fas fa-search me-2"></i>搜尋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 商品統計卡片 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                                    <h4 class="card-title text-primary" id="totalProductsCount">-</h4>
+                                    <p class="card-text text-muted">總商品數</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-eye fa-2x text-success mb-2"></i>
+                                    <h4 class="card-title text-success" id="activeProductsCount">-</h4>
+                                    <p class="card-text text-muted">上架商品</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-fire fa-2x text-warning mb-2"></i>
+                                    <h4 class="card-title text-warning" id="hotProductsCount">-</h4>
+                                    <p class="card-text text-muted">熱銷商品</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                    <h4 class="card-title text-danger" id="lowStockCount">-</h4>
+                                    <p class="card-text text-muted">庫存不足</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 商品列表 -->
+                    <div class="card table-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>商品名稱</th>
+                                            <th>變體規格</th>
+                                            <th>價格</th>
+                                            <th>銷售統計</th>
+                                            <th>狀態</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">載入中...</span>
+                                                </div>
+                                                <p class="mt-2 text-muted">載入商品資料中...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- 分頁控制 -->
+                            <nav aria-label="商品分頁" class="mt-3">
+                                <ul class="pagination justify-content-center" id="productsPagination">
+                                    <!-- 分頁按鈕將由 JavaScript 生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reports" class="content-section" style="display: none;">
+                    <h1 class="page-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        銷售報表
+                    </h1>
+
+                    <!-- 時間範圍選擇 -->
+                    <div class="card table-card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="reportStartDate" class="form-label">開始日期</label>
+                                    <input type="date" class="form-control" id="reportStartDate">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="reportEndDate" class="form-label">結束日期</label>
+                                    <input type="date" class="form-control" id="reportEndDate">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="reportPeriod" class="form-label">時間單位</label>
+                                    <select class="form-select" id="reportPeriod">
+                                        <option value="daily">日</option>
+                                        <option value="weekly">週</option>
+                                        <option value="monthly">月</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button class="btn btn-primary btn-admin w-100 d-block" onclick="loadSalesReport()">
+                                        <i class="fas fa-chart-bar me-2"></i>生成報表
+                                    </button>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button class="btn btn-success btn-admin w-100 d-block" onclick="exportReport()">
+                                        <i class="fas fa-download me-2"></i>匯出 CSV
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 報表摘要卡片 -->
+                    <div class="row mb-4" id="reportSummaryCards">
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                                    <h4 class="card-title text-primary" id="reportTotalOrders">-</h4>
+                                    <p class="card-text text-muted">總訂單數</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                                    <h4 class="card-title text-success" id="reportTotalRevenue">-</h4>
+                                    <p class="card-text text-muted">總營收</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-box fa-2x text-info mb-2"></i>
+                                    <h4 class="card-title text-info" id="reportTotalItems">-</h4>
+                                    <p class="card-text text-muted">總商品數</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-calculator fa-2x text-warning mb-2"></i>
+                                    <h4 class="card-title text-warning" id="reportAvgOrderValue">-</h4>
+                                    <p class="card-text text-muted">平均訂單金額</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 圖表和排行 -->
+                    <div class="row">
+                        <!-- 銷售趨勢圖 -->
+                        <div class="col-md-8 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line me-2"></i>銷售趨勢</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="salesTrendChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 熱銷商品排行 -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-fire me-2"></i>熱銷商品</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>商品</th>
+                                                    <th>銷量</th>
+                                                    <th>營收</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="topProductsTable">
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">請生成報表以查看數據</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 客戶分析 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-users me-2"></i>客戶分析</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h4 class="text-success mb-1" id="reportNewCustomers">-</h4>
+                                                <small class="text-muted">新客戶</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h4 class="text-primary mb-1" id="reportReturningCustomers">-</h4>
+                                                <small class="text-muted">回購客戶</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="text-center">
+                                        <p class="mb-1"><strong>平均每客戶訂單數：</strong><span id="reportAvgOrdersPerCustomer">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 訂單狀態分析 -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card table-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-pie me-2"></i>訂單狀態分析</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <h4 class="text-success mb-1" id="reportCompletedOrders">-</h4>
+                                                <small class="text-muted">已完成</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <h4 class="text-warning mb-1" id="reportPendingOrders">-</h4>
+                                                <small class="text-muted">處理中</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <h4 class="text-danger mb-1" id="reportCancelledOrders">-</h4>
+                                                <small class="text-muted">已取消</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 優質客戶排行 -->
+                    <div class="card table-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-crown me-2"></i>優質客戶排行</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>排名</th>
+                                            <th>客戶姓名</th>
+                                            <th>訂單數</th>
+                                            <th>總消費</th>
+                                            <th>最後下單</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topCustomersTable">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">請生成報表以查看數據</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div id="notifications" class="content-section" style="display: none;">
+                    <h1 class="page-title">通知管理</h1>
+                    <p class="text-muted">通知功能開發中...</p>
+                </div>
+
+                <div id="settings" class="content-section" style="display: none;">
+                    <h1 class="page-title">系統設定</h1>
+                    <p class="text-muted">設定功能開發中...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 建立出貨批次模態框 -->
+    <div class="modal fade" id="createShipmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">建立出貨批次</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createShipmentForm">
+                        <input type="hidden" id="shipmentCustomerId">
+                        <div class="mb-3">
+                            <label class="form-label">批次名稱</label>
+                            <input type="text" class="form-control" id="shipmentBatchName" placeholder="例：2025-01-15 批次">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">客戶</label>
+                            <input type="text" class="form-control" id="shipmentCustomerName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">收件資訊</label>
+                            <textarea class="form-control" id="shipmentShippingInfo" rows="3" placeholder="收件人姓名、電話、地址等"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">運費</label>
+                            <input type="number" class="form-control" id="shipmentShippingFee" value="60">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">備註</label>
+                            <textarea class="form-control" id="shipmentNotes" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">選擇商品項目</label>
+                            <div id="shipmentItemsContainer">
+                                <!-- 動態載入商品選擇 -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="createShipment()">建立批次</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 發送付款通知模態框 -->
+    <div class="modal fade" id="sendPaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">發送付款通知</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendPaymentForm">
+                        <input type="hidden" id="paymentShipmentId">
+                        <div class="mb-3">
+                            <label class="form-label">批次資訊</label>
+                            <div id="paymentShipmentInfo"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">付款說明</label>
+                            <textarea class="form-control" id="paymentInstructions" rows="4" placeholder="請使用銀行轉帳付款，轉帳後請回傳轉帳截圖...">請使用銀行轉帳付款：
+
+帳戶：中國信託 123-456-789012
+戶名：Cyndi 韓國童裝代購
+
+轉帳後請回傳轉帳截圖，謝謝！</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="sendPaymentRequest()">發送通知</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 訂單狀態更新模態框 -->
+    <div class="modal fade" id="updateOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">更新訂單狀態</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newOrderStatus" class="form-label">新狀態</label>
+                        <select class="form-select" id="newOrderStatus">
+                            <option value="待付款">待付款</option>
+                            <option value="已付款">已付款</option>
+                            <option value="配貨中">配貨中</option>
+                            <option value="已出貨">已出貨</option>
+                            <option value="已完成">已完成</option>
+                            <option value="已取消">已取消</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="orderNotes" class="form-label">備註</label>
+                        <textarea class="form-control" id="orderNotes" rows="3" placeholder="更新備註（選填）"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="updateOrderStatus()">確認更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 客戶詳情模態框 -->
+    <div class="modal fade" id="customerDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user me-2"></i>
+                        客戶詳情
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 客戶基本資訊 -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-id-card me-2"></i>基本資訊</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>姓名：</strong>
+                                        <span id="customerDetailName">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>電話：</strong>
+                                        <span id="customerDetailPhone">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>LINE ID：</strong>
+                                        <span id="customerDetailLineId">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>客戶等級：</strong>
+                                        <span id="customerDetailLevel" class="badge">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>收件方式：</strong>
+                                        <span id="customerDetailDeliveryMethod">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>收件地址：</strong>
+                                        <span id="customerDetailAddress">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>註冊時間：</strong>
+                                        <span id="customerDetailRegisteredAt">-</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <strong>備註：</strong>
+                                        <span id="customerDetailNotes">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 消費統計 -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>消費統計</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-primary mb-1" id="customerDetailTotalOrders">0</h4>
+                                                <small class="text-muted">總訂單數</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-success mb-1" id="customerDetailTotalSpent">$0</h4>
+                                                <small class="text-muted">總消費金額</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-info mb-1" id="customerDetailAvgOrder">$0</h4>
+                                                <small class="text-muted">平均訂單金額</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-warning mb-1" id="customerDetailLastOrder">-</h4>
+                                                <small class="text-muted">最後下單</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最近訂單 -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-history me-2"></i>最近訂單</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>訂單編號</th>
+                                            <th>日期</th>
+                                            <th>金額</th>
+                                            <th>狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customerDetailOrders">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">載入中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" onclick="editCustomer()">
+                        <i class="fas fa-edit me-2"></i>編輯客戶
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯客戶模態框 -->
+    <div class="modal fade" id="editCustomerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-edit me-2"></i>
+                        編輯客戶資料
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCustomerForm">
+                        <div class="mb-3">
+                            <label for="editCustomerName" class="form-label">客戶姓名</label>
+                            <input type="text" class="form-control" id="editCustomerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerPhone" class="form-label">聯絡電話</label>
+                            <input type="tel" class="form-control" id="editCustomerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerLevel" class="form-label">客戶等級</label>
+                            <select class="form-select" id="editCustomerLevel" required>
+                                <option value="一般會員">一般會員</option>
+                                <option value="VIP會員">VIP會員</option>
+                                <option value="黑名單">黑名單</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerDeliveryMethod" class="form-label">收件方式</label>
+                            <select class="form-select" id="editCustomerDeliveryMethod">
+                                <option value="宅配到府">宅配到府</option>
+                                <option value="7-11店到店">7-11店到店</option>
+                                <option value="全家店到店">全家店到店</option>
+                                <option value="萊爾富店到店">萊爾富店到店</option>
+                                <option value="OK店到店">OK店到店</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerAddress" class="form-label">收件地址</label>
+                            <textarea class="form-control" id="editCustomerAddress" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerBirthday" class="form-label">生日</label>
+                            <input type="date" class="form-control" id="editCustomerBirthday">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCustomerNotes" class="form-label">備註</label>
+                            <textarea class="form-control" id="editCustomerNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomerChanges()">
+                        <i class="fas fa-save me-2"></i>儲存變更
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品詳情模態框 -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-box me-2"></i>
+                        商品詳情
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 商品基本資訊 -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>基本資訊</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>商品名稱：</strong>
+                                        <span id="productDetailName">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>商品編號：</strong>
+                                        <span id="productDetailCode">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>主分類：</strong>
+                                        <span id="productDetailCategory">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>價格：</strong>
+                                        <span id="productDetailPrice">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>商品狀態：</strong>
+                                        <span id="productDetailStatus" class="badge">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>建立時間：</strong>
+                                        <span id="productDetailCreatedAt">-</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <strong>商品描述：</strong>
+                                        <span id="productDetailDescription">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 銷售統計 -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>銷售統計</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-primary mb-1" id="productDetailTotalSold">0</h4>
+                                                <small class="text-muted">總銷售量</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-success mb-1" id="productDetailTotalRevenue">$0</h4>
+                                                <small class="text-muted">總營收</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-info mb-1" id="productDetailAvgPrice">$0</h4>
+                                                <small class="text-muted">平均單價</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <h4 class="text-warning mb-1" id="productDetailLastSold">-</h4>
+                                                <small class="text-muted">最後銷售</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品變體 -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>商品變體</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>款式</th>
+                                            <th>顏色</th>
+                                            <th>尺寸</th>
+                                            <th>性別</th>
+                                            <th>價格</th>
+                                            <th>狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productDetailVariants">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">載入中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近銷售 -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-history me-2"></i>最近銷售</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>訂單</th>
+                                            <th>數量</th>
+                                            <th>單價</th>
+                                            <th>日期</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productDetailRecentOrders">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">載入中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" onclick="editProduct()">
+                        <i class="fas fa-edit me-2"></i>編輯商品
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯商品模態框 -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>
+                        編輯商品資料
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <div class="mb-3">
+                            <label for="editProductName" class="form-label">商品名稱</label>
+                            <input type="text" class="form-control" id="editProductName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductCode" class="form-label">商品編號</label>
+                            <input type="text" class="form-control" id="editProductCode">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editProductCategory" class="form-label">主分類</label>
+                                    <select class="form-select" id="editProductCategory" required>
+                                        <option value="上衣">上衣</option>
+                                        <option value="褲子">褲子</option>
+                                        <option value="洋裝">洋裝</option>
+                                        <option value="外套">外套</option>
+                                        <option value="配件">配件</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editProductPrice" class="form-label">價格</label>
+                                    <input type="number" class="form-control" id="editProductPrice" min="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductStatus" class="form-label">商品狀態</label>
+                            <select class="form-select" id="editProductStatus" required>
+                                <option value="上架中">上架中</option>
+                                <option value="已下架">已下架</option>
+                                <option value="售完">售完</option>
+                                <option value="預購中">預購中</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductDescription" class="form-label">商品描述</label>
+                            <textarea class="form-control" id="editProductDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProductChanges()">
+                        <i class="fas fa-save me-2"></i>儲存變更
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html> 

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node src/tests/migrateProductsFromNotion.js:*)",
+      "Bash(timeout 3 node:*)",
+      "Bash(if not exist api mkdir api)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

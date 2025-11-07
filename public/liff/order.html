@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>填寫收件資料 - Cyndi 韓國童裝代購</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .btn-primary {
+            background-color: #FF69B4;
+            border-color: #FF69B4;
+        }
+        
+        .btn-primary:hover {
+            background-color: #FF1493;
+            border-color: #FF1493;
+        }
+        
+        .order-summary {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .price-tag {
+            color: #FF69B4;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="text-center mb-4">
+            <h3><i class="fas fa-clipboard-list text-primary"></i> 填寫收件資料</h3>
+            <p class="text-muted">請完整填寫以下資料，以便我們為您配送商品</p>
+        </div>
+
+        <!-- 訂單摘要 -->
+        <div class="order-summary" id="order-summary">
+            <h5><i class="fas fa-shopping-cart"></i> 訂單摘要</h5>
+            <div id="order-items"></div>
+            <hr>
+            <div class="d-flex justify-content-between">
+                <strong>總計：</strong>
+                <span class="price-tag">NT$ <span id="total-amount">0</span></span>
+            </div>
+        </div>
+
+        <!-- 收件資料表單 -->
+        <div class="form-container">
+            <form id="order-form">
+                <div class="mb-3">
+                    <label for="customer-name" class="form-label">
+                        <i class="fas fa-user"></i> 收件人姓名 *
+                    </label>
+                    <input type="text" class="form-control" id="customer-name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="customer-phone" class="form-label">
+                        <i class="fas fa-phone"></i> 聯絡電話 *
+                    </label>
+                    <input type="tel" class="form-control" id="customer-phone" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="customer-address" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i> 收件地址 *
+                    </label>
+                    <textarea class="form-control" id="customer-address" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="shipping-method" class="form-label">
+                        <i class="fas fa-truck"></i> 配送方式
+                    </label>
+                    <select class="form-select" id="shipping-method">
+                        <option value="宅配到府">🚚 宅配到府 (+60元)</option>
+                        <option value="7-11取貨">🏪 7-11 取貨 (+60元)</option>
+                        <option value="全家取貨">🏪 全家取貨 (+60元)</option>
+                        <option value="郵局寄送">📦 郵局寄送 (+80元)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="payment-method" class="form-label">
+                        <i class="fas fa-credit-card"></i> 付款方式
+                    </label>
+                    <select class="form-select" id="payment-method">
+                        <option value="銀行轉帳">🏦 銀行轉帳</option>
+                        <option value="LINE Pay">📱 LINE Pay</option>
+                        <option value="貨到付款">💰 貨到付款 (+30元)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="order-note" class="form-label">
+                        <i class="fas fa-sticky-note"></i> 備註 (選填)
+                    </label>
+                    <textarea class="form-control" id="order-note" rows="2" 
+                              placeholder="如有特殊需求請在此說明..."></textarea>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check-circle"></i> 確認送出訂單
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> 返回購物車
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 載入中遮罩 -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">處理中...</span>
+                    </div>
+                    <h5>處理訂單中...</h5>
+                    <p class="text-muted">請稍候，正在為您建立訂單</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class OrderApp {
+            constructor() {
+                this.userId = null;
+                this.profile = null;
+                this.cart = [];
+                this.apiBaseUrl = '/api';
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    await liff.init({
+                        liffId: process.env.LIFF_ID || 'YOUR_LIFF_ID'
+                    });
+                    
+                    if (liff.isLoggedIn()) {
+                        this.profile = await liff.getProfile();
+                        this.userId = this.profile.userId;
+                        
+                        // 預填用戶資料
+                        document.getElementById('customer-name').value = this.profile.displayName || '';
+                        
+                        // 載入購物車
+                        await this.loadCart();
+                        
+                        // 設定表單提交事件
+                        document.getElementById('order-form').addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            this.submitOrder();
+                        });
+                        
+                    } else {
+                        liff.login();
+                    }
+                    
+                } catch (error) {
+                    console.error('LIFF 初始化失敗:', error);
+                    alert('應用初始化失敗，請重新整理頁面');
+                }
+            }
+            
+            async loadCart() {
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/cart/${this.userId}`);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.cart = result.data.items;
+                        this.renderOrderSummary(result.data.total);
+                    } else {
+                        alert('載入購物車失敗');
+                        this.goBack();
+                    }
+                    
+                } catch (error) {
+                    console.error('載入購物車錯誤:', error);
+                    alert('載入購物車時發生錯誤');
+                }
+            }
+            
+            renderOrderSummary(total) {
+                const container = document.getElementById('order-items');
+                
+                if (this.cart.length === 0) {
+                    alert('購物車是空的');
+                    this.goBack();
+                    return;
+                }
+                
+                const itemsHtml = this.cart.map(item => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong>${item.productName}</strong>
+                            <br>
+                            <small class="text-muted">尺寸：${item.size} | 數量：${item.quantity}</small>
+                        </div>
+                        <span class="price-tag">NT$ ${item.price * item.quantity}</span>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = itemsHtml;
+                document.getElementById('total-amount').textContent = total;
+            }
+            
+            async submitOrder() {
+                try {
+                    // 顯示載入中
+                    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+                    loadingModal.show();
+                    
+                    // 收集表單資料
+                    const customerInfo = {
+                        name: document.getElementById('customer-name').value.trim(),
+                        phone: document.getElementById('customer-phone').value.trim(),
+                        address: document.getElementById('customer-address').value.trim(),
+                        shippingMethod: document.getElementById('shipping-method').value,
+                        paymentMethod: document.getElementById('payment-method').value,
+                        note: document.getElementById('order-note').value.trim()
+                    };
+                    
+                    // 驗證必要欄位
+                    if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
+                        loadingModal.hide();
+                        alert('請填寫所有必要欄位');
+                        return;
+                    }
+                    
+                    // 送出訂單
+                    const response = await fetch(`${this.apiBaseUrl}/orders`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: this.userId,
+                            customerInfo: customerInfo
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    loadingModal.hide();
+                    
+                    if (result.success) {
+                        // 訂單成功
+                        alert(`✅ 訂單建立成功！\n訂單編號：${result.data.orderNumber}\n\n我們將盡快為您處理訂單`);
+                        
+                        // 關閉 LIFF
+                        liff.closeWindow();
+                        
+                    } else {
+                        alert('訂單建立失敗：' + (result.message || '未知錯誤'));
+                    }
+                    
+                } catch (error) {
+                    console.error('送出訂單錯誤:', error);
+                    document.querySelector('#loadingModal').style.display = 'none';
+                    alert('送出訂單時發生錯誤，請重新嘗試');
+                }
+            }
+            
+            goBack() {
+                if (liff.isApiAvailable('closeWindow')) {
+                    liff.closeWindow();
+                } else {
+                    history.back();
+                }
+            }
+        }
+        
+        function goBack() {
+            if (window.orderApp) {
+                window.orderApp.goBack();
+            }
+        }
+        
+        // 初始化應用
+        window.orderApp = new OrderApp();
+    </script>
+</body>
+</html> 
