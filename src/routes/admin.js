@@ -16,14 +16,14 @@ router.get('/dashboard', adminAuth, async (req, res) => {
         // 獲取訂單統計
         const { data: orders, error: ordersError } = await db
             .from('orders')
-            .select('id, status, total_amount_cents');
+            .select('id, status, final_cents');
 
         if (ordersError) throw ordersError;
 
         const totalOrders = orders.length;
         const pendingOrders = orders.filter(o => o.status === '待付款').length;
         const completedOrders = orders.filter(o => o.status === '已完成').length;
-        const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount_cents || 0), 0) / 100;
+        const totalRevenue = orders.reduce((sum, o) => sum + (o.final_cents || 0), 0) / 100;
 
         // 獲取客戶數量
         const { count: customerCount, error: customerError } = await db
@@ -47,7 +47,7 @@ router.get('/dashboard', adminAuth, async (req, res) => {
                     id: o.id,
                     orderNumber: o.id.slice(-8),
                     customerName: '客戶',
-                    amount: Math.round((o.total_amount_cents || 0) / 100),
+                    amount: Math.round((o.final_cents || 0) / 100),
                     status: o.status
                 })),
                 topProducts: [],
@@ -91,7 +91,7 @@ router.get('/orders', adminAuth, async (req, res) => {
             customerName: o.customers?.name || '未知客戶',
             customerPhone: o.customers?.phone || '',
             customerId: o.customer_id,
-            amount: Math.round((o.total_amount_cents || 0) / 100),
+            amount: Math.round((o.final_cents || 0) / 100),
             status: o.status || '待付款',
             mergeStatus: '待併單',
             createdAt: o.created_at
@@ -135,7 +135,7 @@ router.get('/orders/:orderId', adminAuth, async (req, res) => {
                 orderNumber: data.id.slice(-8),
                 customerName: data.customers?.name || '未知客戶',
                 customerPhone: data.customers?.phone || '',
-                amount: Math.round((data.total_amount_cents || 0) / 100),
+                amount: Math.round((data.final_cents || 0) / 100),
                 status: data.status,
                 createdAt: data.created_at
             }
@@ -221,7 +221,7 @@ router.get('/customers', adminAuth, async (req, res) => {
 
         let query = db
             .from('customers')
-            .select('*, orders(id, total_amount_cents, created_at)', { count: 'exact' })
+            .select('*, orders(id, final_cents, created_at)', { count: 'exact' })
             .order('created_at', { ascending: false })
             .range((page - 1) * limit, page * limit - 1);
 
@@ -248,9 +248,9 @@ router.get('/customers', adminAuth, async (req, res) => {
             notes: c.notes,
             stats: {
                 totalOrders: c.orders?.length || 0,
-                totalSpent: c.orders?.reduce((sum, o) => sum + (o.total_amount_cents || 0), 0) / 100 || 0,
+                totalSpent: c.orders?.reduce((sum, o) => sum + (o.final_cents || 0), 0) / 100 || 0,
                 averageOrderValue: c.orders?.length > 0
-                    ? (c.orders.reduce((sum, o) => sum + (o.total_amount_cents || 0), 0) / c.orders.length / 100)
+                    ? (c.orders.reduce((sum, o) => sum + (o.final_cents || 0), 0) / c.orders.length / 100)
                     : 0,
                 lastOrderDate: c.orders?.length > 0 ? c.orders[0].created_at : null
             }
@@ -296,7 +296,7 @@ router.get('/customers/:customerId', adminAuth, async (req, res) => {
         if (ordersError) throw ordersError;
 
         const totalOrders = orders.length;
-        const totalSpent = orders.reduce((sum, o) => sum + (o.total_amount_cents || 0), 0) / 100;
+        const totalSpent = orders.reduce((sum, o) => sum + (o.final_cents || 0), 0) / 100;
 
         res.json({
             success: true,
@@ -320,7 +320,7 @@ router.get('/customers/:customerId', adminAuth, async (req, res) => {
                 },
                 orders: orders.map(o => ({
                     id: o.id,
-                    totalAmount: Math.round((o.total_amount_cents || 0) / 100),
+                    totalAmount: Math.round((o.final_cents || 0) / 100),
                     status: o.status,
                     createdAt: o.created_at
                 }))
@@ -548,7 +548,7 @@ router.get('/reports/sales', adminAuth, async (req, res) => {
         const { data: orders, error } = await query;
         if (error) throw error;
 
-        const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount_cents || 0), 0) / 100;
+        const totalRevenue = orders.reduce((sum, o) => sum + (o.final_cents || 0), 0) / 100;
 
         res.json({
             success: true,
