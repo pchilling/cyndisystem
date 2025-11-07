@@ -34,9 +34,11 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 
-// 靜態檔案服務
-app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
-app.use('/liff', express.static(path.join(__dirname, '../public/liff')));
+// 靜態檔案服務 - 使用絕對路徑
+const publicPath = path.join(process.cwd(), 'public');
+console.log('Public path:', publicPath);
+app.use('/admin', express.static(path.join(publicPath, 'admin')));
+app.use('/liff', express.static(path.join(publicPath, 'liff')));
 
 // 根路由
 app.get('/', (req, res) => {

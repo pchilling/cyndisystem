@@ -3,7 +3,18 @@
     "allow": [
       "Bash(node src/tests/migrateProductsFromNotion.js:*)",
       "Bash(timeout 3 node:*)",
-      "Bash(if not exist api mkdir api)"
+      "Bash(if not exist api mkdir api)",
+      "Bash(git branch:*)",
+      "Bash(vercel --yes:*)",
+      "Bash(vercel env add:*)",
+      "Bash(vercel env:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(vercel ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)"
     ],
     "deny": [],
     "ask": []
