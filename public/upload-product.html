@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速上傳產品 - Cyndi 童裝系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-label { font-weight: bold; }
+        .btn-primary { background: #667eea; border: none; }
+        .success-msg { display: none; padding: 15px; background: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 20px; }
+        .error-msg { display: none; padding: 15px; background: #f8d7da; color: #721c24; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🛍️ 快速上傳產品</h1>
+
+        <div class="success-msg" id="successMsg"></div>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="productForm">
+            <div class="mb-3">
+                <label class="form-label">商品名稱 *</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">商品編號</label>
+                <input type="text" class="form-control" id="code">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">商品圖片網址</label>
+                <input type="url" class="form-control" id="image_url" placeholder="https://...">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">主分類</label>
+                    <select class="form-control" id="main_category">
+                        <option value="童裝">童裝</option>
+                        <option value="配件">配件</option>
+                        <option value="鞋類">鞋類</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">來源國</label>
+                    <select class="form-control" id="origin_country">
+                        <option value="韓國">韓國</option>
+                        <option value="日本">日本</option>
+                        <option value="台灣">台灣</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">描述</label>
+                <textarea class="form-control" id="description" rows="3"></textarea>
+            </div>
+
+            <hr class="my-4">
+            <h5>變體資訊</h5>
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">款式</label>
+                    <input type="text" class="form-control" id="style" placeholder="例：短袖">
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">顏色</label>
+                    <input type="text" class="form-control" id="color" placeholder="例：白色">
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">尺寸</label>
+                    <input type="text" class="form-control" id="size" placeholder="例：M">
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">性別</label>
+                    <select class="form-control" id="gender">
+                        <option value="">不限</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                        <option value="中性">中性</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">價格 (元) *</label>
+                    <input type="number" class="form-control" id="price" required min="0" step="1">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">庫存</label>
+                    <input type="number" class="form-control" id="stock" value="10" min="0">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">狀態</label>
+                <select class="form-control" id="status">
+                    <option value="上架中">上架中</option>
+                    <option value="已下架">已下架</option>
+                    <option value="預購中">預購中</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+                ✅ 上傳產品
+            </button>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="text-center">
+            <a href="/admin" class="btn btn-secondary">返回後台</a>
+        </div>
+    </div>
+
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://lfcqmuztnsaxgksmfbov.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmY3FtdXp0bnNheGdrc21mYm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzExNTU2NzMsImV4cCI6MjA0NjczMTY3M30.bsKiF6JpqPIlTwXd2q40Zt_VgKLJb4SJrAcAr3IrMUg';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                // 1. 先創建產品
+                const productData = {
+                    name: document.getElementById('name').value,
+                    code: document.getElementById('code').value || null,
+                    image_url: document.getElementById('image_url').value || null,
+                    main_category: document.getElementById('main_category').value,
+                    origin_country: document.getElementById('origin_country').value,
+                    description: document.getElementById('description').value || null,
+                };
+
+                const { data: product, error: productError } = await supabase
+                    .from('products')
+                    .insert([productData])
+                    .select()
+                    .single();
+
+                if (productError) throw productError;
+
+                console.log('Product created:', product);
+
+                // 2. 創建變體
+                const variantData = {
+                    product_id: product.id,
+                    name: document.getElementById('name').value, // 變體名稱同商品名稱
+                    variant_id: document.getElementById('code').value || `VAR-${Date.now()}`,
+                    style: document.getElementById('style').value || null,
+                    color: document.getElementById('color').value || null,
+                    size: document.getElementById('size').value || null,
+                    gender: document.getElementById('gender').value || null,
+                    price_cents: parseInt(document.getElementById('price').value) * 100, // 轉成分
+                    stock: parseInt(document.getElementById('stock').value) || 0,
+                    status: document.getElementById('status').value,
+                };
+
+                const { data: variant, error: variantError } = await supabase
+                    .from('product_variants')
+                    .insert([variantData])
+                    .select()
+                    .single();
+
+                if (variantError) throw variantError;
+
+                console.log('Variant created:', variant);
+
+                // 成功
+                successMsg.innerHTML = `✅ 產品「${product.name}」上傳成功！<br>產品 ID: ${product.id}<br>變體 ID: ${variant.id}`;
+                successMsg.style.display = 'block';
+
+                // 清空表單
+                document.getElementById('productForm').reset();
+
+                // 滾動到頂部
+                window.scrollTo(0, 0);
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.innerHTML = `❌ 上傳失敗：${error.message}`;
+                errorMsg.style.display = 'block';
+                window.scrollTo(0, 0);
+            }
+        });
+    </script>
+</body>
+</html>
