@@ -61,10 +61,20 @@ function validateSignature(signature, body) {
 // Webhook 路由
 app.post('/webhook', async (req, res) => {
   try {
+    // 除錯：檢查環境變數
+    console.log('LINE_CHANNEL_SECRET exists:', !!process.env.LINE_CHANNEL_SECRET);
+    console.log('Signature from LINE:', req.headers['x-line-signature']);
+
     // 驗證簽章
     const signature = req.headers['x-line-signature'];
+    if (!signature) {
+      console.error('No signature header');
+      return res.status(400).json({ error: 'No signature header' });
+    }
+
     if (!validateSignature(signature, req.rawBody)) {
       console.error('Invalid signature');
+      console.error('Channel Secret:', process.env.LINE_CHANNEL_SECRET ? 'exists' : 'missing');
       return res.status(403).json({ error: 'Invalid signature' });
     }
 
