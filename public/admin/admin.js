@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // è¼‰å…¥?€è¡¨æ¿?¸æ?
 async function loadDashboard() {
     try {
-        const response = await fetch('/admin/api/dashboard?key=dev');
+        const response = await fetch('/admin/api/dashboard?key=cyndi2024admin');
         const result = await response.json();
         
         if (result.success) {
@@ -203,7 +203,7 @@ async function filterOrdersByMergeStatus(mergeStatus) {
 async function showBatchMergeModal() {
     try {
         // ?²å??€?‰å?ä½µå–®è¨‚å–®
-        const response = await fetch('/admin/api/orders?key=dev&mergeStatus=å¾…ä½µ??);
+        const response = await fetch('/admin/api/orders?key=cyndi2024admin&mergeStatus=å¾…ä½µ??);
         const result = await response.json();
         
         if (!result.success || !result.data.orders.length) {
@@ -333,7 +333,7 @@ async function showBatchMergeModal() {
 async function processOrder(orderId, customerId, customerName) {
     try {
         // ?²å?è©²å®¢?¶ç??€?‰å?ä½µå–®
-        const response = await fetch(`/admin/orders?key=dev&mergeStatus=å¾…ä½µ??customerId=${customerId}`);
+        const response = await fetch(`/admin/orders?key=cyndi2024admin&mergeStatus=å¾…ä½µ??customerId=${customerId}`);
         const result = await response.json();
         
         if (result.success && result.data.orders) {
@@ -476,7 +476,7 @@ function updateSelectedSummary() {
         // ?²å??€?‰é¸å®šè??®ç?è¨‚å–®?…ç›®
         const allOrderItems = [];
         for (const orderId of selectedOrderIds) {
-            const response = await fetch(`/admin/orders/${orderId}/items?key=dev`);
+            const response = await fetch(`/admin/orders/${orderId}/items?key=cyndi2024admin`);
             const result = await response.json();
             if (result.success) {
                 allOrderItems.push(...result.data);
@@ -494,7 +494,7 @@ function updateSelectedSummary() {
         
         console.log('?“¦ ?¼é€å‡ºè²¨æ‰¹æ¬¡è???', shipmentData);
         
-        const createResponse = await fetch('/admin/api/create-shipment?key=dev', {
+        const createResponse = await fetch('/admin/api/create-shipment?key=cyndi2024admin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -541,7 +541,7 @@ function updateSelectedSummary() {
 // ?¥ç?è¨‚å–®?†å?
 async function viewOrderItems(orderId) {
     try {
-        const response = await fetch(`/admin/orders/${orderId}/items?key=dev`);
+        const response = await fetch(`/admin/orders/${orderId}/items?key=cyndi2024admin`);
         const result = await response.json();
         
         if (result.success) {
@@ -568,7 +568,7 @@ async function viewOrderItems(orderId) {
 // å»ºç??®ç?è¨‚å–®?„å‡ºè²¨æ‰¹æ¬?async function createSingleOrderShipment(orderId, customerName) {
     try {
         // ?–å?è¨‚å–®?…ç›®
-        const orderItemsResponse = await fetch(`/admin/orders/${orderId}/items?key=dev`);
+        const orderItemsResponse = await fetch(`/admin/orders/${orderId}/items?key=cyndi2024admin`);
         const orderItemsResult = await orderItemsResponse.json();
         
         if (!orderItemsResult.success) {
@@ -583,7 +583,7 @@ async function viewOrderItems(orderId) {
             notes: '?®ç?è¨‚å–®?´æ¥?ºè²¨'
         };
         
-        const createResponse = await fetch('/admin/api/create-shipment?key=dev', {
+        const createResponse = await fetch('/admin/api/create-shipment?key=cyndi2024admin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -613,7 +613,7 @@ async function viewOrderItems(orderId) {
 // ?¼é€ä?æ¬¾é€šçŸ¥
 async function sendPaymentNotification(shipmentId, customerName) {
     try {
-        const response = await fetch(`/admin/send-payment-request/${shipmentId}?key=dev`, {
+        const response = await fetch(`/admin/send-payment-request/${shipmentId}?key=cyndi2024admin`, {
             method: 'POST'
         });
         
@@ -774,7 +774,7 @@ function openUpdateStatusModal(orderId, currentStatus) {
             }
         }
         
-        const response = await fetch(`/admin/orders/${currentOrderId}/status?key=dev`, {
+        const response = await fetch(`/admin/orders/${currentOrderId}/status?key=cyndi2024admin`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -997,7 +997,7 @@ let currentEditCustomerId = null;
 // ?¥ç?å®¢æˆ¶è©³æ?
 async function viewCustomerDetail(customerId) {
     try {
-        const response = await fetch(`/admin/customers/${customerId}?key=dev`);
+        const response = await fetch(`/admin/customers/${customerId}?key=cyndi2024admin`);
         const result = await response.json();
         
         if (result.success) {
@@ -1080,7 +1080,7 @@ function updateCustomerOrdersTable(orders) {
 
 // ?‹å?ç·¨è¼¯å®¢æˆ¶æ¨¡æ?æ¡?async function openEditCustomerModal(customerId) {
     try {
-        const response = await fetch(`/admin/customers/${customerId}?key=dev`);
+        const response = await fetch(`/admin/customers/${customerId}?key=cyndi2024admin`);
         const result = await response.json();
         
         if (result.success) {
@@ -1140,7 +1140,7 @@ async function saveCustomerChanges() {
             }
         });
         
-        const response = await fetch(`/admin/customers/${currentEditCustomerId}?key=dev`, {
+        const response = await fetch(`/admin/customers/${currentEditCustomerId}?key=cyndi2024admin`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -1300,7 +1300,7 @@ let currentEditProductId = null;
 // ?¥ç??†å?è©³æ?
 async function viewProductDetail(productId) {
     try {
-        const response = await fetch(`/admin/products/${productId}?key=dev`);
+        const response = await fetch(`/admin/products/${productId}?key=cyndi2024admin`);
         const result = await response.json();
         
         if (result.success) {
@@ -1409,7 +1409,7 @@ function updateProductVariantsTable(variants) {
 
 // ?‹å?ç·¨è¼¯?†å?æ¨¡æ?æ¡?async function openEditProductModal(productId) {
     try {
-        const response = await fetch(`/admin/products/${productId}?key=dev`);
+        const response = await fetch(`/admin/products/${productId}?key=cyndi2024admin`);
         const result = await response.json();
         
         if (result.success) {
@@ -1465,7 +1465,7 @@ async function saveProductChanges() {
             }
         });
         
-        const response = await fetch(`/admin/products/${currentEditProductId}?key=dev`, {
+        const response = await fetch(`/admin/products/${currentEditProductId}?key=cyndi2024admin`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
